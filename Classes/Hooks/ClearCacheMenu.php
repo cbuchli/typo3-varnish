@@ -25,6 +25,7 @@ namespace Snowflake\Varnish\Hooks;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 use TYPO3\CMS\Backend\Toolbar\ClearCacheActionsHookInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 
 /**
  * This class contains required hooks which are called by TYPO3
@@ -56,7 +57,7 @@ class ClearCacheMenu implements ClearCacheActionsHookInterface
         $cacheActions[] = array (
             'id' => 'varnish',
             'title' => $title,
-            'href' => 'index.php?ajaxID=tx_varnish::banAll',
+            'href' => BackendUtility::getAjaxUrl('varnishbanall'),
             'icon' => '<img src="/' . $GLOBALS['TYPO3_LOADED_EXT']['varnish']['siteRelPath'] . 'ext_icon.gif" title="' . $title . '" alt="' . $title . '" />',
         );
     }
