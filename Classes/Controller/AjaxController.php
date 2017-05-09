@@ -1,6 +1,6 @@
 <?php
 
-namespace Snowflake\Varnish\Hooks;
+namespace Snowflake\Varnish\Controller;
 
 /***************************************************************
  *  Copyright notice
@@ -24,7 +24,11 @@ namespace Snowflake\Varnish\Hooks;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-use TYPO3\CMS\Backend\Toolbar\ClearCacheActionsHookInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
+
 
 /**
  * This class contains required hooks which are called by TYPO3
@@ -33,32 +37,30 @@ use TYPO3\CMS\Backend\Toolbar\ClearCacheActionsHookInterface;
  * @package    TYPO3
  * @subpackage    tx_varnish
  */
-class ClearCacheMenu implements ClearCacheActionsHookInterface
+class AjaxController
 {
 
 
     /**
-     * Add varnish cache clearing to clearcachemenu
+     * Ban all pages from varnish cache.
      *
-     * @param array $cacheActions The action
-     * @param array $optionValues The values
+     * @param $request
+     * @param $response
      *
      * @return void
+     *
+     * @throws \InvalidArgumentException
      */
-    public function manipulateCacheActions(&$cacheActions, &$optionValues)
+    public function banAll(ServerRequestInterface $request, ResponseInterface $response)
     {
-        // show menu button only admins
-        if (!$GLOBALS['BE_USER']->isAdmin()) {
-            return;
+        # log command
+        if (is_object($GLOBALS['BE_USER'])) {
+            $GLOBALS['BE_USER']->writelog(3, 1, 0, 0, 'User %s has cleared the Varnish cache',
+                array ($GLOBALS['BE_USER']->user['username']));
         }
 
-        $title = $GLOBALS['LANG']->sL('LLL:EXT:varnish/Resources/Private/Language/locallang.xml:be_clear_cache_menu');
-        $cacheActions[] = array (
-            'id' => 'varnish',
-            'title' => $title,
-            'href' => 'index.php?ajaxID=tx_varnish::banAll',
-            'icon' => '<img src="/' . $GLOBALS['TYPO3_LOADED_EXT']['varnish']['siteRelPath'] . 'ext_icon.gif" title="' . $title . '" alt="' . $title . '" />',
-        );
+        /** @var \Snowflake\Varnish\Controller\VarnishController $varnishController */
+        $varnishController = GeneralUtility::makeInstance(VarnishController::class);
+        $varnishController->clearCache('all');
     }
-
 }
